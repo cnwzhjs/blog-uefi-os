@@ -1,0 +1,5 @@
+dist
+target/debug
+target/x86_64-unknown-uefi
+Cargo.lock
+target/.rustc_info.json

@@ -1,0 +1,20 @@
+[package]
+name = "tonyos"
+version = "0.1.0"
+authors = ["Tony Huang <tony@tonyhuang.dev>"]
+edition = "2021"
+
+[build]
+build-stage = 1
+target = ["x86_64-unknown-uefi"]
+
+[dependencies]
+r-efi = "4"
+
+# the profile used for `cargo build`
+[profile.dev]
+panic = "abort" # disable stack unwinding on panic
+
+# the profile used for `cargo build --release`
+[profile.release]
+panic = "abort" # disable stack unwinding on panic
