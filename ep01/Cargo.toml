@@ -9,7 +9,8 @@ build-stage = 1
 target = ["x86_64-unknown-uefi"]
 
 [dependencies]
-r-efi = "4"
+uefi = { version = "0.25", features = ["alloc"] }
+uefi-services = "0.22"
 
 # the profile used for `cargo build`
 [profile.dev]

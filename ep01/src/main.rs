@@ -1,44 +1,19 @@
 #![no_main]
 #![no_std]
 
-extern crate r_efi;
-
-use r_efi::efi;
-
-#[panic_handler]
-fn panic_handler(_info: &core::panic::PanicInfo) -> ! {
-    loop {}
-}
+use uefi::prelude::*;
+use uefi_services::*;
 
 const HELLO_STR: &str = "Hello, world. Press any key to return to UEFI firmware.";
 
-#[export_name = "efi_main"]
-pub extern "C" fn main(_h: efi::Handle, st: *mut efi::SystemTable) -> efi::Status {
-    let mut s = [0u16; HELLO_STR.len() + 1];
-    let mut i = 0usize;
-    for c in HELLO_STR.encode_utf16() {
-        s[i] = c;
-        i += 1;
-        if i >= s.len() {
-            break;
-        }
-    }
+#[entry]
+fn main(_handle: Handle, mut system_table: SystemTable<Boot>) -> Status {
+    uefi_services::init(&mut system_table).unwrap();
 
-    // Print "Hello World!".
-    let r =
-        unsafe { ((*(*st).con_out).output_string)((*st).con_out, s.as_ptr() as *mut efi::Char16) };
-    if r.is_error() {
-        return r;
-    }
+    println!("{}", HELLO_STR);
 
-    // Wait for key input, by waiting on the `wait_for_key` event hook.
-    let r = unsafe {
-        let mut x: usize = 0;
-        ((*(*st).boot_services).wait_for_event)(1, &mut (*(*st).con_in).wait_for_key, &mut x)
-    };
-    if r.is_error() {
-        return r;
-    }
+    let mut events = [ system_table.stdin().wait_for_key_event().unwrap() ];
+    system_table.boot_services().wait_for_event(&mut events).discard_errdata().unwrap();
 
-    efi::Status::SUCCESS
+    Status::SUCCESS
 }
